@@ -1,0 +1,57 @@
+2024-09-18 06:01:49,403 INFO:Successfully connected to the database.
+2024-09-18 06:01:49,411 INFO:Tables 'companies' and 'filings' created or verified successfully.
+2024-09-18 06:01:49,411 INFO:Processing index file: index_files/2020/company_2020_QTR3.idx
+2024-09-18 06:02:31,416 INFO:Successfully processed index_files/2020/company_2020_QTR3.idx
+2024-09-18 06:02:31,603 INFO:Processing index file: index_files/2020/company_2020_QTR2.idx
+2024-09-18 06:03:19,321 INFO:Successfully processed index_files/2020/company_2020_QTR2.idx
+2024-09-18 06:03:19,523 INFO:Processing index file: index_files/2020/company_2020_QTR1.idx
+2024-09-18 06:04:02,288 INFO:Successfully processed index_files/2020/company_2020_QTR1.idx
+2024-09-18 06:04:02,494 INFO:Processing index file: index_files/2020/company_2020_QTR4.idx
+2024-09-18 06:04:42,210 INFO:Successfully processed index_files/2020/company_2020_QTR4.idx
+2024-09-18 06:04:42,388 INFO:Processing index file: index_files/2019/company_2019_QTR4.idx
+2024-09-18 06:05:20,907 INFO:Successfully processed index_files/2019/company_2019_QTR4.idx
+2024-09-18 06:05:21,057 INFO:Processing index file: index_files/2019/company_2019_QTR2.idx
+2024-09-18 06:06:10,103 INFO:Successfully processed index_files/2019/company_2019_QTR2.idx
+2024-09-18 06:06:10,291 INFO:Processing index file: index_files/2019/company_2019_QTR3.idx
+2024-09-18 06:06:48,375 INFO:Successfully processed index_files/2019/company_2019_QTR3.idx
+2024-09-18 06:06:48,527 INFO:Processing index file: index_files/2019/company_2019_QTR1.idx
+2024-09-18 06:07:32,419 INFO:Successfully processed index_files/2019/company_2019_QTR1.idx
+2024-09-18 06:07:32,585 INFO:Processing index file: index_files/2023/company_2023_QTR4.idx
+2024-09-18 06:08:17,511 INFO:Successfully processed index_files/2023/company_2023_QTR4.idx
+2024-09-18 06:08:17,703 INFO:Processing index file: index_files/2023/company_2023_QTR2.idx
+2024-09-18 06:09:05,755 INFO:Successfully processed index_files/2023/company_2023_QTR2.idx
+2024-09-18 06:09:05,921 INFO:Processing index file: index_files/2023/company_2023_QTR1.idx
+2024-09-18 06:09:55,816 INFO:Successfully processed index_files/2023/company_2023_QTR1.idx
+2024-09-18 06:09:56,028 INFO:Processing index file: index_files/2023/company_2023_QTR3.idx
+2024-09-18 06:10:37,847 INFO:Successfully processed index_files/2023/company_2023_QTR3.idx
+2024-09-18 06:10:38,015 INFO:Processing index file: index_files/2018/company_2018_QTR4.idx
+2024-09-18 06:11:17,512 INFO:Successfully processed index_files/2018/company_2018_QTR4.idx
+2024-09-18 06:11:17,649 INFO:Processing index file: index_files/2018/company_2018_QTR3.idx
+2024-09-18 06:11:58,690 INFO:Successfully processed index_files/2018/company_2018_QTR3.idx
+2024-09-18 06:11:58,848 INFO:Processing index file: index_files/2018/company_2018_QTR2.idx
+2024-09-18 06:12:45,413 INFO:Successfully processed index_files/2018/company_2018_QTR2.idx
+2024-09-18 06:12:45,565 INFO:Processing index file: index_files/2018/company_2018_QTR1.idx
+2024-09-18 06:13:27,965 INFO:Successfully processed index_files/2018/company_2018_QTR1.idx
+2024-09-18 06:13:28,122 INFO:Processing index file: index_files/2022/company_2022_QTR4.idx
+2024-09-18 06:14:09,315 INFO:Successfully processed index_files/2022/company_2022_QTR4.idx
+2024-09-18 06:14:09,470 INFO:Processing index file: index_files/2022/company_2022_QTR2.idx
+2024-09-18 06:14:59,176 INFO:Successfully processed index_files/2022/company_2022_QTR2.idx
+2024-09-18 06:14:59,369 INFO:Processing index file: index_files/2022/company_2022_QTR3.idx
+2024-09-18 06:15:38,706 INFO:Successfully processed index_files/2022/company_2022_QTR3.idx
+2024-09-18 06:15:38,859 INFO:Processing index file: index_files/2022/company_2022_QTR1.idx
+2024-09-18 06:16:21,594 INFO:Successfully processed index_files/2022/company_2022_QTR1.idx
+2024-09-18 06:16:21,803 INFO:Processing index file: index_files/2021/company_2021_QTR2.idx
+2024-09-18 06:17:09,586 INFO:Successfully processed index_files/2021/company_2021_QTR2.idx
+2024-09-18 06:17:09,747 INFO:Processing index file: index_files/2021/company_2021_QTR3.idx
+2024-09-18 06:17:50,186 INFO:Successfully processed index_files/2021/company_2021_QTR3.idx
+2024-09-18 06:17:50,340 INFO:Processing index file: index_files/2021/company_2021_QTR4.idx
+2024-09-18 06:18:35,328 INFO:Successfully processed index_files/2021/company_2021_QTR4.idx
+2024-09-18 06:18:35,482 INFO:Processing index file: index_files/2021/company_2021_QTR1.idx
+2024-09-18 06:19:23,565 INFO:Successfully processed index_files/2021/company_2021_QTR1.idx
+2024-09-18 06:19:23,747 INFO:Processing index file: index_files/2024/company_2024_QTR1.idx
+2024-09-18 06:20:05,396 INFO:Successfully processed index_files/2024/company_2024_QTR1.idx
+2024-09-18 06:20:05,572 INFO:Processing index file: index_files/2024/company_2024_QTR3.idx
+2024-09-18 06:20:40,959 INFO:Successfully processed index_files/2024/company_2024_QTR3.idx
+2024-09-18 06:20:41,146 INFO:Processing index file: index_files/2024/company_2024_QTR2.idx
+2024-09-18 06:21:28,546 INFO:Successfully processed index_files/2024/company_2024_QTR2.idx
+2024-09-18 06:21:28,716 INFO:Database connection closed.
