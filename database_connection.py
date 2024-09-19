@@ -24,6 +24,9 @@ db_config = {
 # Lock for thread-safe file operations
 file_lock = threading.Lock()
 
+# Set your User-Agent header
+headers = {'User-Agent': 'YJ-Tsai (YJ-Tsai@github.com)'}
+
 # Connect to the MySQL database
 try:
     cnx = mysql.connector.connect(**db_config)
@@ -33,8 +36,8 @@ except mysql.connector.Error as err:
     logging.error(f"Error connecting to the database: {err}")
     exit(1)
 
-# Set your User-Agent header
-headers = {'User-Agent': 'Your Name (your.email@example.com)'}
+# Flag to indicate if index files were initialized
+index_files_initialized = False
 
 # Function to create tables and add unique constraint
 def create_tables():
@@ -207,8 +210,33 @@ def download_new_index_files(start_date, end_date):
         else:
             logging.warning(f'Index file not found for date: {date_str}')
         
-        time.sleep(0.1)  # Be polite and avoid overloading SEC servers
+        time.sleep(0.5)  # Be polite and avoid overloading SEC servers
         current_date += timedelta(days=1)
+
+# Function to download full index files if none exist
+def init_index_files():
+    global index_files_initialized
+    index_dir = 'index_files'
+    if not os.path.exists(index_dir) or not any(os.scandir(index_dir)):
+        logging.info("Index files not found. Downloading full index files from 2018 to current year.")
+        current_year = datetime.now().year
+        for year in range(2018, current_year + 1):  # Include the current year
+            for quarter in range(1, 5):
+                idx_url = f'https://www.sec.gov/Archives/edgar/full-index/{year}/QTR{quarter}/company.idx'
+                response = requests.get(idx_url, headers=headers)
+                if response.status_code == 200:
+                    idx_dir_year = os.path.join(index_dir, str(year))
+                    os.makedirs(idx_dir_year, exist_ok=True)
+                    idx_file_path = os.path.join(idx_dir_year, f'company_{year}_QTR{quarter}.idx')
+                    with open(idx_file_path, 'wb') as f:
+                        f.write(response.content)
+                    logging.info(f'Downloaded index file: {idx_file_path}')
+                else:
+                    logging.warning(f'Failed to download index file for {year} QTR{quarter}')
+                time.sleep(0.5)  # Be polite and avoid overloading SEC servers
+        index_files_initialized = True
+    else:
+        logging.info("Index files already exist. Skipping full index download.")
 
 # Function to get the last processed date
 def get_last_processed_date():
@@ -218,7 +246,7 @@ def get_last_processed_date():
             return datetime.strptime(date_str, '%Y-%m-%d').date()
     else:
         # If no date is stored, set a default start date
-        return datetime(2024, 9, 18).date()  # Adjust as needed
+        return datetime(2023, 1, 1).date()  # Adjust as needed
 
 # Function to save the last processed date
 def save_last_processed_date(date):
@@ -230,12 +258,8 @@ if __name__ == "__main__":
     # Create tables
     create_tables()
 
-    # Get the last processed date and set the date range
-    last_processed_date = get_last_processed_date()
-    today = datetime.now().date()
-
-    # Download new index files
-    download_new_index_files(last_processed_date + timedelta(days=1), today)
+    # Initialize index files if they don't exist
+    init_index_files()
 
     # Directory containing your index files
     index_directory = 'index_files'  # Update with your actual directory
@@ -243,8 +267,26 @@ if __name__ == "__main__":
     # Process all index files
     process_all_index_files(index_directory)
 
-    # Save the last processed date
-    save_last_processed_date(today)
+    # If index files were initialized, set the last processed date to yesterday
+    if index_files_initialized:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        save_last_processed_date(yesterday)
+        logging.info(f"Set last processed date to yesterday: {yesterday}")
+    else:
+        # Only download new index files if index files were not initialized
+        # Get the last processed date and set the date range
+        last_processed_date = get_last_processed_date()
+        today = datetime.now().date()
+
+        # Download new index files
+        download_new_index_files(last_processed_date + timedelta(days=1), today)
+
+        # Process new index files
+        process_all_index_files(index_directory)
+
+        # Save the last processed date
+        save_last_processed_date(today)
+        logging.info(f"Updated last processed date to today: {today}")
 
     # Close the database connection
     cursor.close()
