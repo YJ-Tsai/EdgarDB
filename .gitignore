@@ -1,3 +1,19 @@
 index_files
-__pycache__
-edgar_parser.log
+*.log
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment directories
+venv/
+env/
+
+# Ignore IDE/editor config files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore data files
+data/

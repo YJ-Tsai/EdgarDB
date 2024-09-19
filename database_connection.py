@@ -1,7 +1,9 @@
-import mysql.connector
-import pandas as pd
+import requests
+from datetime import datetime, timedelta
 import os
 import time
+import mysql.connector
+import pandas as pd
 import io
 import re
 import logging
@@ -19,7 +21,7 @@ db_config = {
     'database': 'tony'
 }
 
-# Lock for thread-safe file operations (if needed)
+# Lock for thread-safe file operations
 file_lock = threading.Lock()
 
 # Connect to the MySQL database
@@ -30,6 +32,9 @@ try:
 except mysql.connector.Error as err:
     logging.error(f"Error connecting to the database: {err}")
     exit(1)
+
+# Set your User-Agent header
+headers = {'User-Agent': 'Your Name (your.email@example.com)'}
 
 # Function to create tables and add unique constraint
 def create_tables():
@@ -102,7 +107,7 @@ def process_index_file(idx_file_path):
 
         lines = content.splitlines()
         
-        # Find the index of the separator line (line with at least 100 hyphens)
+        # Find the index of the separator line
         for i, line in enumerate(lines):
             if len(line.strip()) >= 100 and set(line.strip()) == {'-'}:
                 data_start_index = i + 1  # Data starts after this line
@@ -136,6 +141,7 @@ def process_index_file(idx_file_path):
             company_name = str(row['Company Name']).strip()
             form_type = str(row['Form Type']).strip()
             date_filed = str(row['Date Filed']).strip()
+            date_filed = datetime.strptime(date_filed, '%Y%m%d').date()
             filename = str(row['Filename']).strip()
             url = f"https://www.sec.gov/Archives/{filename}"
 
@@ -166,7 +172,7 @@ def save_processed_file(file_name):
 def process_all_index_files(index_dir):
     processed_files = load_processed_files()
     for root, dirs, files in os.walk(index_dir):
-        for file in files:
+        for file in sorted(files):
             if file.endswith('.idx') and file not in processed_files:
                 idx_file_path = os.path.join(root, file)
                 process_index_file(idx_file_path)
@@ -177,16 +183,68 @@ def process_all_index_files(index_dir):
             else:
                 logging.info(f'Skipping already processed file: {file}')
 
+# Function to get the quarter from a month
+def get_quarter(month):
+    return (month - 1) // 3 + 1
+
+# Function to download new index files
+def download_new_index_files(start_date, end_date):
+    current_date = start_date
+    while current_date <= end_date:
+        year = current_date.year
+        quarter = f"QTR{get_quarter(current_date.month)}"
+        date_str = current_date.strftime('%Y%m%d')
+        idx_url = f'https://www.sec.gov/Archives/edgar/daily-index/{year}/{quarter}/company.{date_str}.idx'
+        
+        response = requests.get(idx_url, headers=headers)
+        if response.status_code == 200:
+            idx_dir = os.path.join('index_files', str(year))
+            os.makedirs(idx_dir, exist_ok=True)
+            idx_file_path = os.path.join(idx_dir, f'company_{date_str}.idx')
+            with open(idx_file_path, 'wb') as f:
+                f.write(response.content)
+            logging.info(f'Downloaded index file: {idx_file_path}')
+        else:
+            logging.warning(f'Index file not found for date: {date_str}')
+        
+        time.sleep(0.1)  # Be polite and avoid overloading SEC servers
+        current_date += timedelta(days=1)
+
+# Function to get the last processed date
+def get_last_processed_date():
+    if os.path.exists('last_processed_date.txt'):
+        with open('last_processed_date.txt', 'r') as f:
+            date_str = f.read().strip()
+            return datetime.strptime(date_str, '%Y-%m-%d').date()
+    else:
+        # If no date is stored, set a default start date
+        return datetime(2024, 9, 18).date()  # Adjust as needed
+
+# Function to save the last processed date
+def save_last_processed_date(date):
+    with open('last_processed_date.txt', 'w') as f:
+        f.write(date.strftime('%Y-%m-%d'))
+
 # Main execution
 if __name__ == "__main__":
-    # Create tables and add unique constraint
+    # Create tables
     create_tables()
+
+    # Get the last processed date and set the date range
+    last_processed_date = get_last_processed_date()
+    today = datetime.now().date()
+
+    # Download new index files
+    download_new_index_files(last_processed_date + timedelta(days=1), today)
 
     # Directory containing your index files
     index_directory = 'index_files'  # Update with your actual directory
 
     # Process all index files
     process_all_index_files(index_directory)
+
+    # Save the last processed date
+    save_last_processed_date(today)
 
     # Close the database connection
     cursor.close()
