@@ -5,6 +5,7 @@ import time
 import io
 import re
 import logging
+import threading
 
 # Configure logging
 logging.basicConfig(filename='edgar_parser.log', level=logging.INFO,
@@ -17,6 +18,9 @@ db_config = {
     'host': 'localhost',
     'database': 'tony'
 }
+
+# Lock for thread-safe file operations (if needed)
+file_lock = threading.Lock()
 
 # Connect to the MySQL database
 try:
@@ -45,14 +49,9 @@ def create_tables():
         date_filed DATE NOT NULL,
         filename VARCHAR(255) NOT NULL,
         url VARCHAR(255) NOT NULL,
-        FOREIGN KEY (cik) REFERENCES companies(cik)
+        FOREIGN KEY (cik) REFERENCES companies(cik),
+        UNIQUE KEY unique_filing (cik, form_type, date_filed, filename)
     );
-    """
-
-    # SQL statement to add unique constraint
-    add_unique_constraint = """
-    ALTER TABLE filings
-    ADD UNIQUE KEY unique_filing (cik, form_type, date_filed, filename);
     """
 
     try:
@@ -60,21 +59,6 @@ def create_tables():
         cursor.execute(create_filings_table)
         cnx.commit()
         logging.info("Tables 'companies' and 'filings' created or verified successfully.")
-
-        # Try adding the unique constraint
-        try:
-            cursor.execute(add_unique_constraint)
-            cnx.commit()
-            logging.info("Unique constraint added to 'filings' table.")
-        except mysql.connector.Error as err:
-            if err.errno == mysql.connector.errorcode.ER_DUP_KEYNAME:
-                logging.info("Unique constraint 'unique_filing' already exists.")
-            elif err.errno == mysql.connector.errorcode.ER_DUP_ENTRY:
-                logging.error("Cannot add unique constraint due to existing duplicate entries.")
-            else:
-                logging.error(f"Error adding unique constraint: {err}")
-                cnx.rollback()
-
     except mysql.connector.Error as err:
         logging.error(f"Error creating tables: {err}")
         cnx.rollback()
@@ -163,15 +147,35 @@ def process_index_file(idx_file_path):
     except Exception as e:
         logging.error(f'Error processing {idx_file_path}: {e}')
 
-# Function to process all index files in a directory
+# Function to load processed files
+def load_processed_files():
+    processed_files = set()
+    if os.path.exists('processed_files.txt'):
+        with open('processed_files.txt', 'r') as f:
+            for line in f:
+                processed_files.add(line.strip())
+    return processed_files
+
+# Function to save a processed file
+def save_processed_file(file_name):
+    with file_lock:
+        with open('processed_files.txt', 'a') as f:
+            f.write(f"{file_name}\n")
+
+# Function to process all index files in a directory, skipping processed files
 def process_all_index_files(index_dir):
+    processed_files = load_processed_files()
     for root, dirs, files in os.walk(index_dir):
         for file in files:
-            if file.endswith('.idx'):
+            if file.endswith('.idx') and file not in processed_files:
                 idx_file_path = os.path.join(root, file)
                 process_index_file(idx_file_path)
+                # Record that this file has been processed
+                save_processed_file(file)
                 # Sleep to avoid overwhelming resources (adjust as needed)
                 time.sleep(0.1)
+            else:
+                logging.info(f'Skipping already processed file: {file}')
 
 # Main execution
 if __name__ == "__main__":
